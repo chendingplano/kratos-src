@@ -394,8 +394,10 @@ func (s *Strategy) initLinkProvider(ctx context.Context, w http.ResponseWriter, 
 	}
 
 	if x.IsJSONRequest(r) {
+		s.d.Logger().WithField("codeURL", codeURL).Info("initLinkProvider, JSON request (ORY_0210083405)")
 		s.d.Writer().WriteError(w, r, flow.NewBrowserLocationChangeRequiredError(codeURL))
 	} else {
+		s.d.Logger().WithField("codeURL", codeURL).Info("initLinkProvider, JSON request (ORY_0210083406)")
 		http.Redirect(w, r, codeURL, http.StatusSeeOther)
 	}
 

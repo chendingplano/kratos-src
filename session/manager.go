@@ -14,7 +14,6 @@ import (
 	"github.com/ory/kratos/selfservice/flow"
 	"github.com/ory/kratos/text"
 	"github.com/ory/kratos/ui/node"
-	"github.com/ory/kratos/x/swagger"
 
 	"github.com/gofrs/uuid"
 
@@ -53,12 +52,14 @@ func (e *ErrNoActiveSessionFound) EnhanceJSONError() interface{} {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type errorAuthenticatorAssuranceLevelNotSatisfied struct {
 	Error swagger.GenericError `json:"error"`
 
 	// Points to where to redirect the user to next.
 	RedirectTo string `json:"redirect_browser_to"`
 }
+*/
 
 // ErrAALNotSatisfied is returned when an active session was found but the requested AAL is not satisfied.
 type ErrAALNotSatisfied struct {

@@ -204,8 +204,10 @@ func (s *Strategy) loginPasswordless(ctx context.Context, w http.ResponseWriter,
 
 		redirectTo := f.AppendTo(s.d.Config().SelfServiceFlowLoginUI(ctx)).String()
 		if x.IsJSONRequest(r) {
+			s.d.Logger().WithField("redirectTo", redirectTo).Info("Passwordless login, JSON request (ORY_0210083407)")
 			s.d.Writer().WriteError(w, r, flow.NewBrowserLocationChangeRequiredError(redirectTo))
 		} else {
+			s.d.Logger().WithField("redirectTo", redirectTo).Info("Passwordless login, JSON request (ORY_0210083408)")
 			http.Redirect(w, r, redirectTo, http.StatusSeeOther)
 		}
 

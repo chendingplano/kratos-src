@@ -359,8 +359,10 @@ func (s *Strategy) Login(w http.ResponseWriter, r *http.Request, f *login.Flow, 
 	}
 
 	if x.IsJSONRequest(r) {
+		s.d.Logger().WithField("codeURL", codeURL).Error("Login, JSON request (ORY_0210083400)")
 		s.d.Writer().WriteError(w, r, flow.NewBrowserLocationChangeRequiredError(codeURL))
 	} else {
+		s.d.Logger().WithField("codeURL", codeURL).Info("Login, not JSON request (ORY_0210083401)")
 		http.Redirect(w, r, codeURL, http.StatusSeeOther)
 	}
 

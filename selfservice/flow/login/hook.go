@@ -287,6 +287,7 @@ func (e *HookExecutor) PostLoginHook(
 			if aalErr := new(session.ErrAALNotSatisfied); errors.As(err, &aalErr) {
 				if data, _ := flow.DuplicateCredentials(f); data == nil {
 					span.SetAttributes(attribute.String("return_to", aalErr.RedirectTo), attribute.String("redirect_reason", "requires aal2"))
+					e.d.Logger().WithField("redirectTo", aalErr.RedirectTo).Info("checkAAL (ORY_0210083413)")
 					e.d.Writer().WriteError(w, r, flow.NewBrowserLocationChangeRequiredError(aalErr.RedirectTo))
 					return nil
 				}
@@ -326,6 +327,7 @@ func (e *HookExecutor) PostLoginHook(
 				return err
 			}
 			span.SetAttributes(attribute.String("return_to", postChallengeURL), attribute.String("redirect_reason", "oauth2 login challenge"))
+			e.d.Logger().WithField("postChallengeURL", postChallengeURL).Info("OAuth login challenge (ORY_0210083413)")
 			e.d.Writer().WriteError(w, r, flow.NewBrowserLocationChangeRequiredError(postChallengeURL))
 			return nil
 		}

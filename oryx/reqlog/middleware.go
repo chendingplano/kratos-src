@@ -4,6 +4,10 @@
 package reqlog
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -114,6 +118,28 @@ func (m *Middleware) WrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+const (
+	ColorGreen  = "\033[32m"
+	ColorReset  = "\033[0m"
+	ColorRed    = "\033[31m"
+	ColorYellow = "\033[33m"
+	ColorBlue   = "\033[34m"
+	Underline   = "\033[4m"
+	Reset       = "\033[0m"
+)
+
+// CHENDING, 206/02/09
+// Note: this function is copied from ApiUtils. It is created so that
+// this package is not dependent on ApiUtils.
+func generateRequestID(key string) string {
+	bytes := make([]byte, 4) // 4 bytes = 8 hex chars
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback if crypto/rand fails (very rare)
+		return "fallback-req-id"
+	}
+	return key + "-" + hex.EncodeToString(bytes)
+}
+
 func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if m.Before == nil {
 		m.Before = DefaultBefore
@@ -142,8 +168,13 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 
 	entry = m.Before(entry, r, remoteAddr)
 
+	reqID := generateRequestID("o")
+	ctx := context.WithValue(r.Context(), "reqID", reqID)
+	r = r.WithContext(ctx)
+
+	path := r.URL.Path
 	if m.logStarting {
-		entry.Log(logLevel, "started handling request")
+		entry.Log(logLevel, fmt.Sprintf("[req=%s] handle request (ORY_0209150500): %s%s%s\n\n", reqID, ColorYellow, "path:"+path, Reset))
 	}
 
 	nrw, ok := rw.(negroni.ResponseWriter)
@@ -156,7 +187,7 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 
 	latency := m.clock.Since(start)
 
-	m.After(entry, r, nrw, latency, m.Name).Log(logLevel, "completed handling request")
+	m.After(entry, r, nrw, latency, m.Name).Log(logLevel, fmt.Sprintf("[req=%s] handle request (ORY_0209150501): %s%s%s ... completed\n\n", reqID, ColorYellow, "path:"+path, Reset))
 }
 
 // BeforeFunc is the func type used to modify or replace the *logrusx.Logger prior

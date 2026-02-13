@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel/trace"
@@ -22,7 +23,8 @@ import (
 
 	"github.com/ory/kratos/selfservice/sessiontokenexchange"
 	"github.com/ory/x/otelx/semconv"
-	"github.com/ory/x/pagination/migrationpagination"
+
+	// "github.com/ory/x/pagination/migrationpagination"
 
 	"github.com/ory/x/pagination/keysetpagination"
 
@@ -110,6 +112,7 @@ func (h *Handler) RegisterPublicRoutes(public *httprouterx.RouterPublic) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used
 type toSession struct {
 	// Set the Session Token when calling from non-browser clients. A session token has a format of `MP2YWEMeM8MxjkGKpH4dqOQ4Q4DlSPaj`.
 	//
@@ -132,6 +135,7 @@ type toSession struct {
 	// in: query
 	TokenizeAs string `json:"tokenize_as"`
 }
+*/
 
 // swagger:route GET /sessions/whoami frontend toSession
 //
@@ -222,7 +226,12 @@ func (h *Handler) whoami(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Ory-Session-Cache-For", fmt.Sprintf("%d", int64(time.Minute.Seconds())))
 		}
 
-		h.r.Logger().WithRequest(r).WithError(err).Info("No valid session found.")
+		if strings.HasPrefix(err.Error(), "request does not have a valid") {
+			h.r.Logger().WithRequest(r).Warn("No valid session found (ORY_0209154500)")
+		} else {
+			h.r.Logger().WithRequest(r).WithError(err).Error("No valid session found (ORY_0209154501)")
+		}
+
 		h.r.Writer().WriteError(w, r, ErrNoSessionFound.WithWrap(err))
 		return
 	}
@@ -280,6 +289,7 @@ func (h *Handler) whoami(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used
 type deleteIdentitySessions struct {
 	// ID is the identity's ID.
 	//
@@ -287,6 +297,7 @@ type deleteIdentitySessions struct {
 	// in: path
 	ID string `json:"id"`
 }
+*/
 
 // swagger:route DELETE /admin/identities/{id}/sessions identity deleteIdentitySessions
 //
@@ -330,6 +341,7 @@ func (h *Handler) deleteIdentitySessions(w http.ResponseWriter, r *http.Request)
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type listSessionsRequest struct {
 	keysetpagination.RequestParameters
 
@@ -346,6 +358,7 @@ type listSessionsRequest struct {
 	// in: query
 	ExpandOptions []SessionExpandable `json:"expand"`
 }
+*/
 
 // Expandable properties of a session
 // swagger:enum SessionExpandable
@@ -364,6 +377,7 @@ const (
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type listSessionsResponse struct {
 	keysetpagination.ResponseHeaders
 
@@ -371,6 +385,7 @@ type listSessionsResponse struct {
 	// in: body
 	Sessions []Session
 }
+*/
 
 // swagger:route GET /admin/sessions identity listSessions
 //
@@ -441,6 +456,7 @@ func (h *Handler) adminListSessions(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type getSession struct {
 	// ExpandOptions is a query parameter encoded list of all properties that must be expanded in the Session.
 	// Example - ?expand=Identity&expand=Devices
@@ -456,6 +472,7 @@ type getSession struct {
 	// in: path
 	ID string `json:"id"`
 }
+*/
 
 // swagger:route GET /admin/sessions/{id} identity getSession
 //
@@ -522,6 +539,7 @@ func (h *Handler) getSession(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type disableSession struct {
 	// ID is the session's ID.
 	//
@@ -529,6 +547,7 @@ type disableSession struct {
 	// in: path
 	ID string `json:"id"`
 }
+*/
 
 // swagger:route DELETE /admin/sessions/{id} identity disableSession
 //
@@ -570,6 +589,7 @@ func (h *Handler) disableSession(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type listIdentitySessionsRequest struct {
 	migrationpagination.RequestParameters
 
@@ -585,6 +605,7 @@ type listIdentitySessionsRequest struct {
 	// in: query
 	Active bool `json:"active"`
 }
+*/
 
 // List Identity Sessions Response
 //
@@ -592,12 +613,14 @@ type listIdentitySessionsRequest struct {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type listIdentitySessionsResponse struct {
 	migrationpagination.ResponseHeaderAnnotation
 
 	// in: body
 	Body []Session
 }
+*/
 
 // swagger:route GET /admin/identities/{id}/sessions identity listIdentitySessions
 //
@@ -662,6 +685,7 @@ type deleteMySessionsCount struct {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type disableMyOtherSessions struct {
 	// Set the Session Token when calling from non-browser clients. A session token has a format of `MP2YWEMeM8MxjkGKpH4dqOQ4Q4DlSPaj`.
 	//
@@ -677,6 +701,7 @@ type disableMyOtherSessions struct {
 	// in: header
 	Cookie string `json:"Cookie"`
 }
+*/
 
 // swagger:route DELETE /sessions frontend disableMyOtherSessions
 //
@@ -718,6 +743,7 @@ func (h *Handler) deleteMySessions(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type disableMySession struct {
 	// ID is the session's ID.
 	//
@@ -739,6 +765,7 @@ type disableMySession struct {
 	// in: header
 	Cookie string `json:"Cookie"`
 }
+*/
 
 // swagger:route DELETE /sessions/{id} frontend disableMySession
 //
@@ -796,6 +823,7 @@ func (h *Handler) deleteMySession(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type listMySessionsParameters struct {
 	migrationpagination.RequestParameters
 
@@ -813,6 +841,7 @@ type listMySessionsParameters struct {
 	// in: header
 	Cookie string `json:"Cookie"`
 }
+*/
 
 // List My Session Response
 //
@@ -820,12 +849,14 @@ type listMySessionsParameters struct {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type listMySessionsResponse struct {
 	migrationpagination.ResponseHeaderAnnotation
 
 	// in: body
 	Body []Session
 }
+*/
 
 // swagger:route GET /sessions frontend listMySessions
 //
@@ -904,6 +935,7 @@ func (h *Handler) IsAuthenticated(wrap http.HandlerFunc, onUnauthenticated http.
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type extendSession struct {
 	// ID is the session's ID.
 	//
@@ -911,6 +943,7 @@ type extendSession struct {
 	// in: path
 	ID string `json:"id"`
 }
+*/
 
 // swagger:route PATCH /admin/sessions/{id}/extend identity extendSession
 //
@@ -1023,6 +1056,7 @@ func RespondWitherrorGenericOnAuthenticated(h herodot.Writer, err error) http.Ha
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type exchangeSessionToken struct {
 	// The part of the code return when initializing the flow.
 	//
@@ -1036,6 +1070,7 @@ type exchangeSessionToken struct {
 	// in: query
 	ReturnToCode string `json:"return_to_code"`
 }
+*/
 
 // The Response for Registration Flows via API
 //

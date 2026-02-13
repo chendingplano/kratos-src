@@ -329,9 +329,11 @@ func (h *Handler) FromOldFlow(w http.ResponseWriter, r *http.Request, of Flow) (
 //
 // swagger:parameters createNativeLoginFlow
 //
+// type createNativeLoginFlow struct {
+//
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
-type createNativeLoginFlow struct {
+type CreateNativeLoginFlow struct {
 	// Refresh a login session
 	//
 	// If set to true, this will refresh an existing login session by
@@ -447,9 +449,11 @@ func (h *Handler) createNativeLoginFlow(w http.ResponseWriter, r *http.Request) 
 //
 // swagger:parameters createBrowserLoginFlow
 //
+// type createBrowserLoginFlow struct {
+//
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
-type createBrowserLoginFlow struct {
+type CreateBrowserLoginFlow struct {
 	// Refresh a login session
 	//
 	// If set to true, this will refresh an existing login session by
@@ -650,9 +654,11 @@ func (h *Handler) createBrowserLoginFlow(w http.ResponseWriter, r *http.Request)
 //
 // swagger:parameters getLoginFlow
 //
+// type getLoginFlow struct {
+//
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
-type getLoginFlow struct {
+type GetLoginFlow struct {
 	// The Login Flow ID
 	//
 	// The value for this parameter comes from `flow` URL Query parameter sent to your
@@ -770,6 +776,7 @@ func (h *Handler) getLoginFlow(w http.ResponseWriter, r *http.Request) {
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
+/* CHENDING, not used, 2026/02/09
 type updateLoginFlow struct {
 	// The Login Flow ID
 	//
@@ -798,12 +805,13 @@ type updateLoginFlow struct {
 	// name: Cookie
 	Cookies string `json:"Cookie"`
 }
+*/
 
 // swagger:model updateLoginFlowBody
 //
 //nolint:deadcode,unused
 //lint:ignore U1000 Used to generate Swagger and OpenAPI definitions
-type updateLoginFlowBody struct{}
+// type updateLoginFlowBody struct{}
 
 // swagger:route POST /self-service/login frontend updateLoginFlow
 //

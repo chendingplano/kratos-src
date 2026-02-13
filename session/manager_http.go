@@ -254,7 +254,9 @@ func (s *ManagerHTTP) FetchFromRequest(ctx context.Context, r *http.Request) (_ 
 
 	token := s.extractToken(r.WithContext(ctx))
 	if token == "" {
-		return nil, errors.WithStack(NewErrNoCredentialsForSession())
+		// CHENDING, 2026/02/09
+		// return nil, errors.WithStack(NewErrNoCredentialsForSession())
+		return nil, NewErrNoCredentialsForSession()
 	}
 
 	se, err := s.r.SessionPersister().GetSessionByToken(ctx, token,

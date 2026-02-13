@@ -161,26 +161,26 @@ func (s *Strategy) Verify(w http.ResponseWriter, r *http.Request, f *verificatio
 }
 
 func (s *Strategy) handleLinkClick(ctx context.Context, w http.ResponseWriter, r *http.Request, f *verification.Flow, code string) error {
-	// Pre-fill the code
-	if codeField := f.UI.Nodes.Find("code"); codeField != nil {
-		codeField.Attributes.SetValue(code)
+	// Auto-verify the code directly when the user clicks the email link,
+	// instead of redirecting to a separate UI page that would need to re-submit.
+	if err := s.verificationUseCode(ctx, w, r, code, f); err != nil {
+		// If verification fails, fall back to redirecting to the verification UI
+		if codeField := f.UI.Nodes.Find("code"); codeField != nil {
+			codeField.Attributes.SetValue(code)
+		}
+		csrfToken := s.deps.CSRFHandler().RegenerateToken(w, r)
+		f.UI.SetCSRF(csrfToken)
+		f.CSRFToken = csrfToken
+		if updateErr := s.deps.VerificationFlowPersister().UpdateVerificationFlow(ctx, f); updateErr != nil {
+			return updateErr
+		}
+		http.Redirect(w, r, f.AppendTo(s.deps.Config().SelfServiceFlowVerificationUI(ctx)).String(), http.StatusSeeOther)
+		return errors.WithStack(flow.ErrCompletedByStrategy)
 	}
 
-	// In the verification flow, we can't enforce CSRF if the flow is opened from an email, so we initialize the CSRF
-	// token here, so all subsequent interactions are protected
-	csrfToken := s.deps.CSRFHandler().RegenerateToken(w, r)
-	f.UI.SetCSRF(csrfToken)
-	f.CSRFToken = csrfToken
-
-	if err := s.deps.VerificationFlowPersister().UpdateVerificationFlow(ctx, f); err != nil {
-		return err
-	}
-
-	// we always redirect to the browser UI here to allow API flows to complete aswell
-	// TODO: In the future, we might want to redirect to a custom URI scheme here, to allow to open an app on the device of
-	// the user to handle the flow directly.
-	http.Redirect(w, r, f.AppendTo(s.deps.Config().SelfServiceFlowVerificationUI(ctx)).String(), http.StatusSeeOther)
-
+	// Verification succeeded - redirect to the continue URL (e.g. login page)
+	returnTo := f.ContinueURL(ctx, s.deps.Config())
+	http.Redirect(w, r, returnTo.String(), http.StatusSeeOther)
 	return errors.WithStack(flow.ErrCompletedByStrategy)
 }
 

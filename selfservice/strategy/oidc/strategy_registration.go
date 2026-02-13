@@ -254,8 +254,10 @@ func (s *Strategy) Register(w http.ResponseWriter, r *http.Request, f *registrat
 		return s.HandleError(ctx, w, r, f, pid, nil, err)
 	}
 	if x.IsJSONRequest(r) {
+		s.d.Logger().WithField("codeURL", codeURL).Info("oidc registration, JSON request (ORY_0210083402)")
 		s.d.Writer().WriteError(w, r, flow.NewBrowserLocationChangeRequiredError(codeURL))
 	} else {
+		s.d.Logger().WithField("codeURL", codeURL).Info("oidc registration, JSON request (ORY_0210083403)")
 		http.Redirect(w, r, codeURL, http.StatusSeeOther)
 	}
 
