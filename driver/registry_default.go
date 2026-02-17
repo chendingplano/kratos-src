@@ -321,7 +321,14 @@ func (m *RegistryDefault) selfServiceStrategies() []any {
 			m.selfserviceStrategies = []any{
 				profile.NewStrategy(m), // <- should remain first
 				password.NewStrategy(m),
-				oidc.NewStrategy(m),
+				oidc.NewStrategy(m, oidc.WithOnConflictingIdentity(
+				func(_ context.Context, _, _ *identity.Identity, _ oidc.Provider, claims *oidc.Claims) oidc.ConflictingIdentityVerdict {
+					if bool(claims.EmailVerified) {
+						return oidc.ConflictingIdentityVerdictMerge
+					}
+					return oidc.ConflictingIdentityVerdictReject
+				},
+			)),
 				code.NewStrategy(m),
 				link.NewStrategy(m),
 				totp.NewStrategy(m),
